@@ -1,4 +1,5 @@
-(ns sicp-clojure.ch1)
+(ns sicp-clojure.ch1 
+  (:require [sicp-clojure.util :refer [trace]]))
 
 (defn sq [x]
   (* x x))
@@ -128,18 +129,70 @@
 (defn fn-1-11 [n]
   (defn core-1-11 [fst snd thr x]
     (println fst snd thr x)
-    (if (= x 0)
+    (if (<= x 0)
       fst
       (core-1-11 (+ fst (* 2 snd) (* 3 thr))
                  fst
                  snd
                  (- x 1))))
-  (core-1-11 1 0 0 n))
+  (if (< n 3)
+    n
+    (core-1-11 2 1 0 (- n 2))))
 (defn fn-1-11-2 [n]
   (if (>= n 3)
-    (+ (fn-1-11-2 (- n 1))
-       (* 2 (fn-1-11-2 (- n 2)))
-       (* 3 (fn-1-11-2 (- n 3))))
+    ;; (+ (fn-1-11-2 (- n 1))
+    ;;    (* 2 (fn-1-11-2 (- n 2)))
+    ;;    (* 3 (fn-1-11-2 (- n 3))))
+    (->>
+     [(fn-1-11-2 (- n 1)) (* 2 (fn-1-11-2 (- n 2))) (* 3 (fn-1-11-2 (- n 3)))]
+     (map trace)
+     (reduce + 0))
     n))
-(fn-1-11 3)
-(fn-1-11-2 3)
+(fn-1-11 5)
+(fn-1-11-2 5)
+
+; 1.12 pascal triangle
+(defn fn-1-12 [layer]
+  (defn get-pos-num-1-12 [n current-layer prev-layer-ls]
+    (if (or (= n 0) (= n (dec current-layer)))
+      1
+      (+ (prev-layer-ls (- n 1)) (prev-layer-ls n)))) 
+  (defn core-1-12 [current-layer]
+    (if (= current-layer 1)
+    [1]
+    (let [prev-layer (core-1-12 (dec current-layer))]
+      (->>
+       (for [n (range 0 current-layer)]
+         (get-pos-num-1-12 n current-layer prev-layer))
+       (into [])))))
+  (->>
+   (for [n (range 1 (inc layer))] (core-1-12 n))
+   (into [])))
+(fn-1-12 4)
+
+;; 1.13
+;; prove |Fib(n) - φ^n/sqrt(5)| <= 1, φ = (1+sqrt(5))/2
+;; when n = 1
+;; LHS = |Fib(1) - (1+sqrt(5))/(2*sqrt(5))|
+;;     = |1 - 0.7236|
+;;     <= RHS
+
+;; assume |Fib(k) - φ^k/sqrt(5)| <= 1 is true
+;; i.e. -1 <= Fib(k) - φ^k/sqrt(5) <= 1
+;;      φ^k/sqrt(5) - 1 <= Fib(k) <= φ^k/sqrt(5) + 1
+
+;; when n = k + 1
+;; LHS = |Fib(k+1) - φ^(k+1)/sqrt(5)|
+;;     <= |φ^(k+1)/sqrt(5) + 1 - φ^(k+1)/sqrt(5)|
+;;     = 1
+
+;; 1.15
+(defn cube [x] (* x x x))
+(defn p [x]
+  (println "-")
+  (- (* 3 x) (* 4 (cube x))))
+(defn sine [angle]
+  (if (not (> (abs angle) 0.1))
+    angle 
+    (p (sine (/ angle 3.0)))))
+(sine 12.15)

@@ -1,5 +1,4 @@
-(ns sicp-clojure.core
-  (require sicp-clojure.ch1))
+(ns sicp-clojure.core)
 
 (defn -main []
   )
